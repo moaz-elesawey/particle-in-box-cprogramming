@@ -3,13 +3,13 @@
 
 #include <math.h>
 
-#define N 50
+#define N 150
 
-#define nx 2
-#define ny 1
+#define nx 1
+#define ny 2
 #define nz 3
 
-#define NT 100
+#define NT 150
 
 #define a 2.0
 #define b 2.0

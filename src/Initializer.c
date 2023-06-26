@@ -1,8 +1,8 @@
 #include "Initializer.h"
 
 
-void Init(double *xs, double *ys, double **xx, double **yy, double *ts,
-          double ***psi, double ***den) {
+void Init(double *xs, double *ys, double *xx, double *yy, double *ts,
+          double *psi, double *den) {
 
     printf("\nInitializing Variables...\n");
 
@@ -28,14 +28,14 @@ void LineSpace(double *xs, int size, double inc){
 }
 
 
-void MeshGrid(double *xs, double *ys, double **xx, double **yy){
+void MeshGrid(double *xs, double *ys, double *xx, double *yy){
     /* create a meshgrid from linear arrays */
 
 
     for(int i=0; i<N; i++) {
         for(int j=0; j<N; j++) {
-            xx[j][i] = xs[i];
-            yy[i][j] = ys[i];
+            xx[j*N + i] = xs[i];
+            yy[i*N + j] = ys[i];
         }
     }
 
@@ -43,48 +43,48 @@ void MeshGrid(double *xs, double *ys, double **xx, double **yy){
 }
 
 
-void PrintMat1D(double *x) {
-    printf("===============================\n");
+/* void PrintMat1D(double *x) { */
+/*     printf("===============================\n"); */
     
-    for(int i=0; i<NT; i++)
-        printf("%.2f ", x[i]);
+/*     for(int i=0; i<NT; i++) */
+/*         printf("%.2f ", x[i]); */
 
-    printf("\n===============================\n");
+/*     printf("\n===============================\n"); */
 
-    return ;
+/*     return ; */
 
-}
-
-
-void PrintMat2D(double **xx) {
-
-    printf("===============================\n");
-    for(int i=0; i<N; i++) {
-        for(int j=0; j<N; j++) {
-            printf("%.2f ", xx[i][j]);
-        }
-        printf("\n");
-    }
-    printf("===============================\n");
-
-    return ;
-}
+/* } */
 
 
-void PrintMat3D(double ***den, int n_samples) {
+/* void PrintMat2D(double **xx) { */
 
-    for (int n=0; n<n_samples; n++){
-        printf("===============================\n");
-        for(int i=0; i<N; i++) {
-            for(int j=0; j<N; j++) {
-                printf("%.2f ", den[n][i][j]);
-            }
-            printf("\n");
-        }
-        printf("===============================\n");
-    }
+/*     printf("===============================\n"); */
+/*     for(int i=0; i<N; i++) { */
+/*         for(int j=0; j<N; j++) { */
+/*             printf("%.2f ", xx[i][j]); */
+/*         } */
+/*         printf("\n"); */
+/*     } */
+/*     printf("===============================\n"); */
 
-    return ;
-}
+/*     return ; */
+/* } */
+
+
+/* void PrintMat3D(double ***den, int n_samples) { */
+
+/*     for (int n=0; n<n_samples; n++){ */
+/*         printf("===============================\n"); */
+/*         for(int i=0; i<N; i++) { */
+/*             for(int j=0; j<N; j++) { */
+/*                 printf("%.2f ", den[n][i][j]); */
+/*             } */
+/*             printf("\n"); */
+/*         } */
+/*         printf("===============================\n"); */
+/*     } */
+
+/*     return ; */
+/* } */
 
 

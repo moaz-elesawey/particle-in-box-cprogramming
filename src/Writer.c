@@ -1,102 +1,53 @@
 #include "Writer.h"
+#include "hdf5.h"
 
 
-void Write(double **xx, double **yy, double *ts, double ***psi, double ***den) {
-   
-    printf("\nDone All Calculations. Writing to [%s]...\n", fname);
+void WriteH5(double *xx, double *yy, double *ts, double *psi, double *den) {
+	
+	char *filename = "result.h5";
 
-    int nc_id;
+    hid_t file, den_ds, psi_ds, xx_ds, yy_ds;
+	hid_t dataspace_3d, dataspace_2d;
 
-    int ns_id, nt_id;
-    int a_id, b_id;
+    herr_t status;
 
-    /* int linedim_id[1]; */
-    /* int griddim_id[2]; */
-    /* int boxdim_id[3]; */
+	int rank_3d = 3, rank_2d = 2;
 
-    /* int xxvar_id, yyvar_id, psivar_id, denvar_id; */
+	hsize_t dim_3d[3] = {NT, N, N};
+	hsize_t dim_2d[2] = {N, N};
 
-    /* int tsvar_id; */
+	double * data = (double *) calloc(N*N*NT, sizeof(double));
 
-    // create the nc file.
-    NCErrorHandler( nc_create("result.nc", NC_NETCDF4, &nc_id) );
+    file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    NCErrorHandler( nc_def_dim(nc_id, "N",  N , &ns_id) );
-    NCErrorHandler( nc_def_dim(nc_id, "NT", NT , &nt_id) );
-
-    NCErrorHandler( nc_def_dim(nc_id, "a", a , &a_id) );
-    NCErrorHandler( nc_def_dim(nc_id, "b", b , &b_id) );
-
-    /* linedim_id[0] = nt_id; */
-
-    /* griddim_id[0] = ns_id; */
-    /* griddim_id[1] = ns_id; */
-
-    /* boxdim_id[0] = nt_id; */
-    /* boxdim_id[1] = ns_id; */
-    /* boxdim_id[2] = ns_id; */
-
-    // creating the variables
-    /* NCErrorHandler( nc_def_var(nc_id, "xx" , NC_DOUBLE, 2, griddim_id, &xxvar_id) ); */
-    /* NCErrorHandler( nc_def_var(nc_id, "yy" , NC_DOUBLE, 2, griddim_id, &yyvar_id) ); */
-
-    /* NCErrorHandler( nc_def_var(nc_id, "t"  , NC_DOUBLE, 1, linedim_id, &tsvar_id) ); */
-
-    /* NCErrorHandler( nc_def_var(nc_id, "psi", NC_DOUBLE, 3, boxdim_id, &psivar_id) ); */
-    /* NCErrorHandler( nc_def_var(nc_id, "den", NC_DOUBLE, 3, boxdim_id, &denvar_id) ); */
-
-    NCErrorHandler( nc_enddef(nc_id) );
-
-    /* // placing the variables */
-    /* NCErrorHandler( nc_put_var_double(nc_id, xxvar_id , &xx[0][0]) ); */
-    /* NCErrorHandler( nc_put_var_double(nc_id, yyvar_id , &yy[0][0]) ); */
-
-    /* NCErrorHandler( nc_put_var_double(nc_id, tsvar_id , &ts[0]) ); */
-    
-    /* NCErrorHandler( nc_put_var_double(nc_id, psivar_id, &psi[0][0][0]) ); */
-    /* NCErrorHandler( nc_put_var_double(nc_id, denvar_id, &den[0][0][0]) ); */
+    dataspace_3d = H5Screate_simple(rank_3d, dim_3d, NULL);
+    dataspace_2d = H5Screate_simple(rank_2d, dim_2d, NULL);
 
 
-    // close the  nc file.
-    NCErrorHandler( nc_close(nc_id) );
+    den_ds = H5Dcreate(file, "density", H5T_NATIVE_DOUBLE, dataspace_3d, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(den_ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(den[0]));
 
-    return ;
+    psi_ds = H5Dcreate(file, "wavefunction", H5T_NATIVE_DOUBLE, dataspace_3d, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(psi_ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(psi[0]));
+
+    xx_ds = H5Dcreate(file, "xx", H5T_NATIVE_DOUBLE, dataspace_2d, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(xx_ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(xx[0]));
+
+    yy_ds = H5Dcreate(file, "yy", H5T_NATIVE_DOUBLE, dataspace_2d, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    status = H5Dwrite(yy_ds, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, &(yy[0]));
+
+	free(data);
+
+    H5Sclose(dataspace_3d);
+    H5Sclose(dataspace_2d);
+    H5Dclose(psi_ds);
+    H5Dclose(den_ds);
+    H5Dclose(xx_ds);
+    H5Dclose(yy_ds);
+    H5Fclose(file);
+	
+	printf("Done Writing Data to result.h5 with status %d\n", status);
+
+	return ;
 }
 
-
-void NCErrorHandler(int val) {
-    
-    /* Error Handler to chech plancing variables has done successfully or not
-     * @param val int : error code 
-     */
-   
-    if (val) {
-        printf("Error: %s\n", nc_strerror(val));
-        exit(2);
-    }
-}
-
-
-void WriteSample(char *filename, double ***den) {
-
-    printf("\nWriting Data to [%s]...\n", filename);
-
-    FILE *fptr;
-    fptr = fopen(filename, "w");
-
-    if(fptr != NULL) {
-        for(int n=0; n<NT; n++){
-            for(int i=0; i<N; i++){
-                for(int j=0; j<N; j++){
-                    fprintf(fptr, "%.5f ", den[n][i][j]);
-                }
-                fprintf(fptr, "\n");
-            }
-            fprintf(fptr, "\n");
-        }
-    }
-
-    fclose(fptr);
-
-    return ;
-}

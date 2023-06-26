@@ -7,6 +7,7 @@
 #include "Writer.h"
 
 
+
 int main(int argc, char **argv) {
 
 
@@ -19,28 +20,12 @@ int main(int argc, char **argv) {
     double *ts = (double*) calloc(NT, sizeof(double));
 
     // hold the grid of x and y to solve fror
-    double **xx = (double**) calloc(N*N, sizeof(double));
-    double **yy = (double**) calloc(N*N, sizeof(double));
+    double *xx = (double*) calloc(N*N, sizeof(double));
+    double *yy = (double*) calloc(N*N, sizeof(double));
 
     // hold the wave function and the density
-    double ***psi = (double***) calloc(NT*N*N, sizeof(double));
-    double ***den = (double***) calloc(NT*N*N, sizeof(double));
-
-    // creates the grids arrays
-    for(int i=0; i<N; i++) {
-        xx[i] = (double*) calloc(N, sizeof(double));
-        yy[i] = (double*) calloc(N, sizeof(double));
-    }
-
-    // creates the wavefunction array
-    for(int i=0; i<NT; i++) {
-        psi[i] = (double**) calloc(N*N, sizeof(double));
-        den[i] = (double**) calloc(N*N, sizeof(double));
-        for(int j=0; j<N; j++){
-            psi[i][j] = (double*) calloc(N, sizeof(double));
-            den[i][j] = (double*) calloc(N, sizeof(double));
-        }
-    }
+    double *psi = (double*) calloc(NT*N*N, sizeof(double));
+    double *den = (double*) calloc(NT*N*N, sizeof(double));
 
 
     // Initialize the variables
@@ -49,11 +34,8 @@ int main(int argc, char **argv) {
     // Solve the Porblem and Store res in psi and den
     Solve(xx, yy, ts, psi, den);
 
-    // Write out the results to NetCDF file
-    Write(xx, yy, ts, psi, den);
-
-    WriteSample("density.txt", den);
-    WriteSample("wavefunction.txt", psi);
+	// Write to H5 File
+	WriteH5(xx, yy, ts, psi, den);
 
     // free up the heap memory
     free(xs);
@@ -61,17 +43,11 @@ int main(int argc, char **argv) {
     free(zs);
     free(ts);
 
-    for(int i=0; i<N; i++){
-        free(xx[i]);
-        free(yy[i]);
-    }
+	free(xx);
+	free(yy);
 
-    for(int i=0; i<NT; i++){
-        for(int j=0; j<N; j++){
-            free(psi[i][j]);
-            free(den[i][j]);
-        }
-    }
+	free(psi);
+	free(den);
 
     return EXIT_SUCCESS;
 }

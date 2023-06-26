@@ -6,7 +6,7 @@
 #include <math.h>
 
 
-void Solve(double **xx, double **yy, double *ts, double ***psi, double ***den);
+void Solve(double *xx, double *yy, double *ts, double *psi, double *den);
 
 
 #endif //SOLVER_H_INCLUDED
